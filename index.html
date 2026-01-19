@@ -40,7 +40,7 @@
 
   <script>
     // Store messages in memory
-    let messages = [];
+    let messages = JSON.parse(sessionStorage.getItem("chat_messages")) || [];
     let username = null;
     let userColor = null;
 
