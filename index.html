@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>shiyas ahneee</title>
+  <title>shiyas ahnee</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 
 <body class="bg-gradient-to-br from-amber-50 via-orange-50 to-yellow-50 flex items-center justify-center min-h-screen p-4">
@@ -13,8 +17,8 @@
     
     <!-- Header -->
     <div class="p-6 border-b border-white/30 text-center backdrop-blur-sm">
-      <h1 class="font-bold text-amber-900 text-2xl">Ayachooo</h1>
-      <p class="text-amber-700/60 text-sm mt-1">set allee</p>
+      <h1 class="font-bold text-amber-900 text-2xl">Ayachoo</h1>
+      <p class="text-amber-700/60 text-sm mt-1">Set alleee</p>
     </div>
 
     <!-- Messages Container -->
@@ -39,10 +43,20 @@
   </div>
 
   <script>
-    // Store messages in memory
-    let messages = JSON.parse(sessionStorage.getItem("chat_messages")) || [];
-    let username = null;
-    let userColor = null;
+    const firebaseConfig = {
+      apiKey: "AIzaSyAUqiNw-LuPrvQx7_daNo5o-uHym1dzaf8",
+      authDomain: "hellyeahchatty.firebaseapp.com",
+      databaseURL: "https://hellyeahchatty-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "hellyeahchatty",
+      storageBucket: "hellyeahchatty.firebasestorage.app",
+      messagingSenderId: "184169148818",
+      appId: "1:184169148818:web:73c88a741ee75d2388d14b",
+      measurementId: "G-6VJDC936Q8"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const messagesRef = db.ref("messages");
 
     // Color palette for names
     const colors = [
@@ -62,44 +76,46 @@
     }
 
     // Get or ask username
-    function setUsername() {
+    let username = localStorage.getItem("chat_name");
+    if (!username) {
       username = prompt("Enter your name");
-      if (!username) {
-        username = "Anonymous";
-      }
-      userColor = getRandomColor();
+      localStorage.setItem("chat_name", username || "Anonymous");
     }
 
-    // Display message
-    function displayMessage(name, text, color) {
-      const messagesDiv = document.getElementById("messages");
-      
+    const messagesDiv = document.getElementById("messages");
+    const userColor = getRandomColor();
+
+    // Load messages
+    messagesRef.limitToLast(100).on("child_added", snapshot => {
+      const { name, text } = snapshot.val();
+
       const msg = document.createElement("div");
       msg.className = "animate-fadeIn";
       msg.innerHTML = `
         <div class="flex flex-col">
           <div class="flex items-center gap-2">
-            <span class="font-bold ${color} text-sm">${name}</span>
+            <span class="font-bold ${getRandomColor()} text-sm">${name}</span>
             <span class="text-amber-600/50 text-xs">now</span>
           </div>
           <p class="text-amber-900 text-sm mt-2 bg-white/50 backdrop-blur-sm p-4 rounded-2xl border border-white/40 leading-relaxed">${text}</p>
         </div>
       `;
-      
       messagesDiv.appendChild(msg);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
+    });
 
     // Send message
     function sendMessage() {
       const input = document.getElementById("messageInput");
       const text = input.value.trim();
-      
       if (!text) return;
 
-      messages.push({ name: username, text: text, color: userColor });
-      
-      displayMessage(username, text, userColor);
+      messagesRef.push({
+        name: username,
+        text: text,
+        time: Date.now()
+      });
+
       input.value = "";
     }
 
@@ -107,9 +123,6 @@
     document.getElementById("messageInput").addEventListener("keypress", (e) => {
       if (e.key === "Enter") sendMessage();
     });
-
-    // Initialize
-    setUsername();
 
   </script>
 
