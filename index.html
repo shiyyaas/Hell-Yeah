@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ayak</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+
+<body class="bg-slate-100 flex items-center justify-center h-screen">
+
+  <div class="w-full max-w-md bg-white rounded-xl shadow-lg flex flex-col h-[90vh]">
+    
+    <!-- Header -->
+    <div class="p-4 border-b text-center font-semibold text-sky-600">
+      SET ALLEE
+    </div>
+
+    <!-- Messages -->
+    <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-2 text-sm"></div>
+
+    <!-- Input -->
+    <div class="p-3 border-t flex gap-2">
+      <input
+        id="messageInput"
+        type="text"
+        placeholder="Type a message..."
+        class="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400"
+      />
+      <button
+        onclick="sendMessage()"
+        class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600"
+      >
+        Send
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    
+  const firebaseConfig = {
+    apiKey: "AIzaSyAUqiNw-LuPrvQx7_daNo5o-uHym1dzaf8",
+    authDomain: "hellyeahchatty.firebaseapp.com",
+    databaseURL: "https://hellyeahchatty-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "hellyeahchatty",
+    storageBucket: "hellyeahchatty.firebasestorage.app",
+    messagingSenderId: "184169148818",
+    appId: "1:184169148818:web:73c88a741ee75d2388d14b",
+    measurementId: "G-6VJDC936Q8"
+  };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const messagesRef = db.ref("messages");
+
+    // Get or ask username
+    let username = localStorage.getItem("chat_name");
+    if (!username) {
+      username = prompt("Enter your name");
+      localStorage.setItem("chat_name", username || "Anonymous");
+    }
+
+    const messagesDiv = document.getElementById("messages");
+
+    // Load messages
+    messagesRef.limitToLast(100).on("child_added", snapshot => {
+      const { name, text } = snapshot.val();
+
+      const msg = document.createElement("div");
+      msg.innerHTML = `<span class="font-semibold text-sky-600">${name}</span>: ${text}`;
+      messagesDiv.appendChild(msg);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+
+    // Send message
+    function sendMessage() {
+      const input = document.getElementById("messageInput");
+      const text = input.value.trim();
+      if (!text) return;
+
+      messagesRef.push({
+        name: username,
+        text: text,
+        time: Date.now()
+      });
+
+      input.value = "";
+    }
+  </script>
+
+</body>
+</html>
