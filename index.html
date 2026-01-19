@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Ayak</title>
+  <title>One Room</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Tailwind CDN -->
@@ -13,54 +13,61 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 
-<body class="bg-slate-100 flex items-center justify-center h-screen">
+<body class="h-screen bg-gradient-to-br from-[#0f0f0f] via-black to-[#0f0f0f] text-white flex items-center justify-center">
 
-  <div class="w-full max-w-md bg-white rounded-xl shadow-lg flex flex-col h-[90vh]">
-    
+  <!-- App Container -->
+  <div class="w-full max-w-md h-full sm:h-[94vh] bg-[#121212] sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+
     <!-- Header -->
-    <div class="p-4 border-b text-center font-semibold text-sky-600">
-      SET ALLEE
+    <div class="flex items-center gap-3 px-5 py-4 border-b border-white/10">
+      <div class="w-10 h-10 rounded-full bg-yellow-400 text-black flex items-center justify-center font-bold">
+        👻
+      </div>
+      <div class="flex-1">
+        <div class="font-semibold text-sm">Public Room</div>
+        <div class="text-xs text-white/50">Anyone can chat</div>
+      </div>
     </div>
 
     <!-- Messages -->
-    <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-2 text-sm"></div>
+    <div id="messages" class="flex-1 overflow-y-auto px-4 py-4 space-y-4 text-sm"></div>
 
     <!-- Input -->
-    <div class="p-3 border-t flex gap-2">
+    <div class="p-3 border-t border-white/10 flex gap-2">
       <input
         id="messageInput"
         type="text"
-        placeholder="Type a message..."
-        class="flex-1 border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-sky-400"
+        placeholder="Send a message"
+        class="flex-1 bg-[#1f1f1f] rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+        onkeydown="if(event.key==='Enter') sendMessage()"
       />
       <button
         onclick="sendMessage()"
-        class="bg-sky-500 text-white px-4 py-2 rounded-lg hover:bg-sky-600"
+        class="bg-yellow-400 text-black w-10 h-10 rounded-full flex items-center justify-center font-bold hover:bg-yellow-300"
       >
-        Send
+        ➤
       </button>
     </div>
 
   </div>
 
   <script>
-    
-  const firebaseConfig = {
-    apiKey: "AIzaSyAUqiNw-LuPrvQx7_daNo5o-uHym1dzaf8",
-    authDomain: "hellyeahchatty.firebaseapp.com",
-    databaseURL: "https://hellyeahchatty-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "hellyeahchatty",
-    storageBucket: "hellyeahchatty.firebasestorage.app",
-    messagingSenderId: "184169148818",
-    appId: "1:184169148818:web:73c88a741ee75d2388d14b",
-    measurementId: "G-6VJDC936Q8"
-  };
+    // 🔥 FIREBASE CONFIG (REPLACE THIS)
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_DOMAIN",
+      databaseURL: "YOUR_DATABASE_URL",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_BUCKET",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const messagesRef = db.ref("messages");
 
-    // Get or ask username
+    // Username (no login)
     let username = localStorage.getItem("chat_name");
     if (!username) {
       username = prompt("Enter your name");
@@ -69,12 +76,47 @@
 
     const messagesDiv = document.getElementById("messages");
 
+    // 🎨 Consistent random color per username
+    function nameColor(name) {
+      const colors = [
+        "text-red-400",
+        "text-orange-400",
+        "text-yellow-400",
+        "text-green-400",
+        "text-emerald-400",
+        "text-cyan-400",
+        "text-blue-400",
+        "text-indigo-400",
+        "text-purple-400",
+        "text-pink-400"
+      ];
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+      }
+      return colors[Math.abs(hash) % colors.length];
+    }
+
     // Load messages
-    messagesRef.limitToLast(100).on("child_added", snapshot => {
-      const { name, text } = snapshot.val();
+    messagesRef.limitToLast(150).on("child_added", snap => {
+      const { name, text } = snap.val();
+      const color = nameColor(name);
 
       const msg = document.createElement("div");
-      msg.innerHTML = `<span class="font-semibold text-sky-600">${name}</span>: ${text}`;
+      msg.className = "flex gap-3 items-start";
+
+      msg.innerHTML = `
+        <div class="w-8 h-8 rounded-full bg-[#2a2a2a] flex items-center justify-center text-xs font-semibold">
+          ${name[0].toUpperCase()}
+        </div>
+        <div class="max-w-[75%]">
+          <div class="text-xs font-semibold ${color}">${name}</div>
+          <div class="mt-1 bg-[#1f1f1f] rounded-2xl px-4 py-2 break-words">
+            ${text}
+          </div>
+        </div>
+      `;
+
       messagesDiv.appendChild(msg);
       messagesDiv.scrollTop = messagesDiv.scrollHeight;
     });
