@@ -58,6 +58,7 @@
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
+    const storage = firebase.storage();
     const messagesRef = db.ref("messages");
 
     const colors = [
