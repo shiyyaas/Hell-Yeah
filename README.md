@@ -71,7 +71,7 @@ Feel free to fork this project and make it your own. Pull requests are welcome!
 
 ## License
 
-[MIT]
+[MIT LICENSE](https://github.com/shiyyaas/Hell-Yeah/blob/main/LICENSE)
 
 ---
 
