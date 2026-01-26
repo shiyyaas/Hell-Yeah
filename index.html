@@ -11,6 +11,7 @@
   <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 </head>
 
 <body class="bg-[#0f0f0f] flex items-center justify-center min-h-screen p-4 text-white">
@@ -28,12 +29,23 @@
 
     <!-- Input -->
     <div class="p-3 border-t border-[#2a2a2a] bg-[#1a1a1a] flex gap-2 items-center">
+
+      <!-- Image input -->
+      <input type="file" id="imageInput" accept="image/*" class="hidden" />
+      <button
+        onclick="document.getElementById('imageInput').click()"
+        class="bg-[#262626] border border-[#333] px-3 py-2 rounded-full text-sm"
+      >
+        📷
+      </button>
+
       <input
         id="messageInput"
         type="text"
         placeholder="Message..."
         class="flex-1 bg-[#262626] border border-[#333] rounded-full px-4 py-2 text-white placeholder-gray-400 focus:outline-none text-sm"
       />
+
       <button
         onclick="sendMessage()"
         class="bg-[#0095f6] hover:bg-[#1877f2] text-white px-4 py-2 rounded-full font-semibold text-sm"
@@ -52,24 +64,19 @@
       projectId: "hellyeahchatty",
       storageBucket: "hellyeahchatty.firebasestorage.app",
       messagingSenderId: "184169148818",
-      appId: "1:184169148818:web:73c88a741ee75d2388d14b",
-      measurementId: "G-6VJDC936Q8"
+      appId: "1:184169148818:web:73c88a741ee75d2388d14b"
     };
 
     firebase.initializeApp(firebaseConfig);
+
     const db = firebase.database();
     const storage = firebase.storage();
     const messagesRef = db.ref("messages");
 
     const colors = [
-      "text-red-400",
-      "text-pink-400",
-      "text-purple-400",
-      "text-blue-400",
-      "text-cyan-400",
-      "text-green-400",
-      "text-yellow-400",
-      "text-orange-400"
+      "text-red-400","text-pink-400","text-purple-400",
+      "text-blue-400","text-cyan-400","text-green-400",
+      "text-yellow-400","text-orange-400"
     ];
 
     function getRandomColor() {
@@ -85,19 +92,23 @@
     const messagesDiv = document.getElementById("messages");
 
     messagesRef.limitToLast(100).on("child_added", snapshot => {
-      const { name, text } = snapshot.val();
+      const { name, text, image } = snapshot.val();
 
       const msg = document.createElement("div");
       msg.className = "animate-fadeIn";
 
       msg.innerHTML = `
         <div class="flex flex-col gap-1">
-          <div class="flex items-center gap-2">
-            <span class="font-semibold text-xs ${getRandomColor()}">${name}</span>
-          </div>
-          <p class="text-white text-sm bg-[#262626] px-4 py-2 rounded-2xl max-w-[75%] leading-relaxed">
+          <span class="font-semibold text-xs ${getRandomColor()}">${name}</span>
+
+          ${text ? `
+          <p class="text-white text-sm bg-[#262626] px-4 py-2 rounded-2xl max-w-[75%]">
             ${text}
-          </p>
+          </p>` : ""}
+
+          ${image ? `
+          <img src="${image}" class="max-w-[75%] rounded-2xl border border-[#333]" />`
+          : ""}
         </div>
       `;
 
@@ -112,12 +123,29 @@
 
       messagesRef.push({
         name: username,
-        text: text,
+        text,
         time: Date.now()
       });
 
       input.value = "";
     }
+
+    document.getElementById("imageInput").addEventListener("change", async e => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const ref = storage.ref("chat_images/" + Date.now());
+      await ref.put(file);
+      const url = await ref.getDownloadURL();
+
+      messagesRef.push({
+        name: username,
+        image: url,
+        time: Date.now()
+      });
+
+      e.target.value = "";
+    });
 
     document.getElementById("messageInput").addEventListener("keypress", e => {
       if (e.key === "Enter") sendMessage();
@@ -126,19 +154,10 @@
 
   <style>
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
-    .animate-fadeIn {
-      animation: fadeIn 0.2s ease-out;
-    }
+    .animate-fadeIn { animation: fadeIn 0.2s ease-out; }
   </style>
 
 </body>
