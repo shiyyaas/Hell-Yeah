@@ -24,13 +24,14 @@
       <p class="text-gray-400 text-xs mt-1">Set allee</p>
     </div>
 
-    <!-- Messages -->
-    <div id="messages" class="flex-1 overflow-y-auto p-4 space-y-3 bg-[#0f0f0f]"></div>
+    <!-- Messages (Discord-style centered column) -->
+    <div id="messages" class="flex-1 overflow-y-auto bg-[#0f0f0f] flex justify-center">
+      <div id="messagesInner" class="w-full max-w-[700px] p-4 space-y-4"></div>
+    </div>
 
     <!-- Input -->
     <div class="p-3 border-t border-[#2a2a2a] bg-[#1a1a1a] flex gap-2 items-center">
 
-      <!-- Image input -->
       <input type="file" id="imageInput" accept="image/*" class="hidden" />
       <button
         onclick="document.getElementById('imageInput').click()"
@@ -89,7 +90,7 @@
       localStorage.setItem("chat_name", username || "Anonymous");
     }
 
-    const messagesDiv = document.getElementById("messages");
+    const messagesDiv = document.getElementById("messagesInner");
 
     messagesRef.limitToLast(100).on("child_added", snapshot => {
       const { name, text, image } = snapshot.val();
@@ -98,17 +99,23 @@
       msg.className = "animate-fadeIn";
 
       msg.innerHTML = `
-        <div class="flex flex-col gap-1">
-          <span class="font-semibold text-xs ${getRandomColor()}">${name}</span>
+        <div class="flex gap-3 items-start">
+          <div class="w-9 h-9 rounded-full bg-[#262626] flex items-center justify-center text-xs font-semibold">
+            ${name[0].toUpperCase()}
+          </div>
 
-          ${text ? `
-          <p class="text-white text-sm bg-[#262626] px-4 py-2 rounded-2xl max-w-[75%]">
-            ${text}
-          </p>` : ""}
+          <div class="flex flex-col gap-1">
+            <span class="font-semibold text-sm ${getRandomColor()}">${name}</span>
 
-          ${image ? `
-          <img src="${image}" class="max-w-[75%] rounded-2xl border border-[#333]" />`
-          : ""}
+            ${text ? `
+            <p class="text-sm text-gray-100 leading-relaxed">
+              ${text}
+            </p>` : ""}
+
+            ${image ? `
+            <img src="${image}" class="mt-1 max-w-[400px] rounded-xl border border-[#333]" />`
+            : ""}
+          </div>
         </div>
       `;
 
