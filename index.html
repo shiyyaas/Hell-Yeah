@@ -19,12 +19,23 @@
   <div class="w-full md:max-w-[844px] bg-[#1a1a1a] rounded-2xl flex flex-col h-[90vh] border border-[#2a2a2a]">
 
     <!-- Header -->
-    <div class="p-4 border-b border-[#2a2a2a] text-center bg-[#1a1a1a]">
-      <h1 class="font-semibold text-white text-base">Ayachoo</h1>
-      <p class="text-gray-400 text-xs mt-1">Set allee</p>
+    <div class="p-4 border-b border-[#2a2a2a] bg-[#1a1a1a] flex items-center justify-between">
+      <div></div>
+
+      <div class="text-center flex-1">
+        <h1 class="font-semibold text-white text-base">Ayachoo</h1>
+        <p class="text-gray-400 text-xs mt-1">Set allee</p>
+      </div>
+
+      <button
+        onclick="clearChat()"
+        class="text-xs text-red-400 hover:text-red-500"
+      >
+        Clear
+      </button>
     </div>
 
-    <!-- Messages (Discord-style centered column) -->
+    <!-- Messages -->
     <div id="messages" class="flex-1 overflow-y-auto bg-[#0f0f0f] flex justify-center">
       <div id="messagesInner" class="w-full max-w-[700px] p-4 space-y-4"></div>
     </div>
@@ -73,6 +84,8 @@
     const db = firebase.database();
     const storage = firebase.storage();
     const messagesRef = db.ref("messages");
+
+    const CLEAR_PASSWORD = "shiyas-parayum"; 
 
     const colors = [
       "text-red-400","text-pink-400","text-purple-400",
@@ -153,6 +166,23 @@
 
       e.target.value = "";
     });
+
+    async function clearChat() {
+      const pass = prompt("Enter admin password");
+      if (pass !== CLEAR_PASSWORD) {
+        alert("Wrong password");
+        return;
+      }
+
+      await messagesRef.remove();
+
+      const folder = storage.ref("chat_images");
+      const list = await folder.listAll();
+      await Promise.all(list.items.map(item => item.delete()));
+
+      messagesDiv.innerHTML = "";
+      alert("Chat cleared");
+    }
 
     document.getElementById("messageInput").addEventListener("keypress", e => {
       if (e.key === "Enter") sendMessage();
