@@ -19,9 +19,8 @@ With the help of ChatGPT, I created **Hell Yeah** - a simple, fast, and responsi
 
 ## Tech Stack 🛠️
 
-- **Frontend**: [Your frontend framework/library]
+- **Frontend**: simple HTML,CSS,JS
 - **Backend**: Firebase (Firestore Database & Storage)
-- **Styling**: Custom CSS
 
 ## Getting Started 🚀
 
@@ -54,7 +53,7 @@ cd Hell-Yeah
 5. Run the application
 
 ```bash
-Double click html or Deploy with vercel
+Double click HTML or Deploy with vercel
 ```
 
 ## How It Works 🔧
